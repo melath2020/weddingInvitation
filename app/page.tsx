@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 export default function WeddingInvitation() {
   const [opened, setOpened] = useState(false);
   const [showContent, setShowContent] = useState(false);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const sparkleCanvasRef = useRef<HTMLCanvasElement>(null);
+  const animFrameRef = useRef<number>(0);
 
   const weddingDate = new Date("2026-04-12T11:00:00");
 
@@ -24,6 +26,127 @@ export default function WeddingInvitation() {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
+
+  // sparkle canvas on main content
+  useEffect(() => {
+    if (!showContent) return;
+    const canvas = sparkleCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const resize = () => {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    type Particle = {
+      x: number; y: number;
+      vx: number; vy: number;
+      size: number; alpha: number;
+      decay: number; color: string;
+      shape: "star" | "circle" | "diamond";
+      rotation: number; vrot: number;
+    };
+
+    const colors = ["#c9a84c", "#f0d080", "#e8c84a", "#d45e00", "#fdf8ee", "#b87461"];
+    const particles: Particle[] = [];
+
+    const spawn = () => {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height;
+      particles.push({
+        x, y,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: -0.5 - Math.random() * 1.2,
+        size: 1.5 + Math.random() * 3.5,
+        alpha: 0,
+        decay: 0.004 + Math.random() * 0.006,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        shape: ["star", "circle", "diamond"][Math.floor(Math.random() * 3)] as "star" | "circle" | "diamond",
+        rotation: Math.random() * Math.PI * 2,
+        vrot: (Math.random() - 0.5) * 0.08,
+      });
+    };
+
+    const drawStar = (ctx: CanvasRenderingContext2D, x: number, y: number, r: number, rot: number) => {
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const angle = rot + (i * Math.PI * 2) / 5 - Math.PI / 2;
+        const inner = rot + ((i + 0.5) * Math.PI * 2) / 5 - Math.PI / 2;
+        if (i === 0) ctx.moveTo(x + Math.cos(angle) * r, y + Math.sin(angle) * r);
+        else ctx.lineTo(x + Math.cos(angle) * r, y + Math.sin(angle) * r);
+        ctx.lineTo(x + Math.cos(inner) * r * 0.4, y + Math.sin(inner) * r * 0.4);
+      }
+      ctx.closePath();
+    };
+
+    let spawnTimer = 0;
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      spawnTimer++;
+      if (spawnTimer % 8 === 0 && particles.length < 60) spawn();
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        // fade in then out
+        if (p.alpha < 0.8 && p.vy < 0) p.alpha += 0.03;
+        else p.alpha -= p.decay;
+
+        if (p.alpha <= 0) { particles.splice(i, 1); continue; }
+
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rotation += p.vrot;
+
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 6;
+
+        if (p.shape === "circle") {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (p.shape === "star") {
+          drawStar(ctx, p.x, p.y, p.size * 1.2, p.rotation);
+          ctx.fill();
+        } else {
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rotation);
+          ctx.beginPath();
+          ctx.moveTo(0, -p.size);
+          ctx.lineTo(p.size, 0);
+          ctx.lineTo(0, p.size);
+          ctx.lineTo(-p.size, 0);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+      animFrameRef.current = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      cancelAnimationFrame(animFrameRef.current);
+      window.removeEventListener("resize", resize);
+    };
+  }, [showContent]);
+
+  // scroll-triggered fade-ins
+  useEffect(() => {
+    if (!showContent) return;
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add("in-view"); }),
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll(".scroll-reveal").forEach(el => observer.observe(el));
+    return () => observer.disconnect();
+  }, [showContent]);
 
   const handleOpen = () => {
     setOpened(true);
@@ -62,9 +185,30 @@ export default function WeddingInvitation() {
           padding: 2rem 1rem 4rem;
         }
 
-        /* ════════════════════════════
-           NEW OPENING SCREEN — MANDALA / FULL SCREEN CARD
-        ════════════════════════════ */
+        /* ── SPARKLE CANVAS ── */
+        .sparkle-canvas {
+          position: fixed;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 2;
+        }
+
+        /* ── SCROLL REVEAL ── */
+        .scroll-reveal {
+          opacity: 0;
+          transform: translateY(22px);
+          transition: opacity 0.75s ease, transform 0.75s ease;
+        }
+        .scroll-reveal.in-view {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        .scroll-reveal.delay-1 { transition-delay: 0.1s; }
+        .scroll-reveal.delay-2 { transition-delay: 0.2s; }
+        .scroll-reveal.delay-3 { transition-delay: 0.35s; }
+        .scroll-reveal.delay-4 { transition-delay: 0.5s; }
         .envelope-screen {
           position: fixed;
           inset: 0;
@@ -868,6 +1012,9 @@ export default function WeddingInvitation() {
 
       {/* ── MAIN INVITATION ── */}
       <div className={`invitation-wrap${showContent ? " visible" : ""}`}>
+
+        {/* sparkle particles */}
+        {showContent && <canvas ref={sparkleCanvasRef} className="sparkle-canvas" />}
         <div className="outer-frame">
           <div className="gold-border-top" />
           <div className="corner-tl" />
@@ -877,7 +1024,7 @@ export default function WeddingInvitation() {
 
           <div className="inner-content">
 
-            <div className="top-band">
+            <div className="top-band scroll-reveal">
               <div className="ganesha-wrap">
                 <span className="ganesha-icon">ॐ</span>
                 <span className="sri-text">ശ്രീ</span>
@@ -891,7 +1038,7 @@ export default function WeddingInvitation() {
               <span className="divider-line" />
             </div>
 
-            <div className="couple-grid">
+            <div className="couple-grid scroll-reveal delay-1">
               <div className="person-block">
                 <div className="person-role">വരൻ:</div>
                 <div className="person-name">അരുൺകുമാർ</div>
@@ -923,9 +1070,9 @@ export default function WeddingInvitation() {
               <span className="divider-line" />
             </div>
 
-            <div className="vivaha-title">വിവാഹസുദിനം</div>
+            <div className="vivaha-title scroll-reveal delay-1">വിവാഹസുദിനം</div>
 
-            <div className="info-boxes">
+            <div className="info-boxes scroll-reveal delay-2">
               <div className="info-box">
                 <span className="info-box-icon">📅</span>
                 <div className="info-box-label">തീയതി</div>
@@ -946,7 +1093,7 @@ export default function WeddingInvitation() {
               </div>
             </div>
 
-            <div className="countdown-section">
+            <div className="countdown-section scroll-reveal delay-2">
               <div className="countdown-label">ശുഭദിനം വരെ</div>
               <div className="countdown-grid">
                 {[
@@ -963,7 +1110,7 @@ export default function WeddingInvitation() {
               </div>
             </div>
 
-            <div className="reception-block">
+            <div className="reception-block scroll-reveal delay-1">
               <div className="reception-intro">ഇവർ തമ്മിലുള്ള വിവാഹത്തിലും</div>
               <div className="reception-date">2026 ഏപ്രിൽ 13 തിങ്കളാഴ്ച</div>
               <div className="reception-time">വൈകുന്നേരം 4 മണി മുതൽ രാത്രി 9 മണിവരെ</div>
@@ -974,7 +1121,7 @@ export default function WeddingInvitation() {
               <div className="reception-invite">താങ്കളെ കുടുംബസമേതം ക്ഷണിക്കുന്നു.</div>
             </div>
 
-            <div className="map-section">
+            <div className="map-section scroll-reveal delay-2">
               <div className="map-section-title">
                 വേദി
                 <span />
@@ -1034,7 +1181,7 @@ export default function WeddingInvitation() {
               <span className="divider-line" />
             </div>
 
-            <div className="hosts-block">
+            <div className="hosts-block scroll-reveal delay-1">
               <div className="hosts-names">
                 പത്മനാഭൻ മണന്തല<br />
                 ഉമാദേവി പത്മനാഭൻ
@@ -1044,7 +1191,7 @@ export default function WeddingInvitation() {
               </div>
             </div>
 
-            <div className="note-row">
+            <div className="note-row scroll-reveal delay-2">
               <span className="note-tag">തലേദിവസം പാർട്ടി ഉണ്ടായിരിക്കുന്നതല്ല</span>
             </div>
 
@@ -1061,7 +1208,7 @@ export default function WeddingInvitation() {
           letterSpacing: "0.15em",
           fontFamily: "'Raleway', sans-serif",
         }}>
-          MADE WITH ❤️ BY   <a href="https://aswinsudhakaran.in/" target="_blank" rel="noopener noreferrer" style={{ color: "var(--muted)", textDecoration: "none", borderBottom: "1px solid rgba(107,76,30,0.3)" }}>AS</a>
+          WITH LOVE BY <a href="https://aswinsudhakaran.in/" target="_blank" rel="noopener noreferrer" style={{ color: "var(--muted)", textDecoration: "none", borderBottom: "1px solid rgba(107,76,30,0.3)" }}>AS</a>
         </div>
       </div>
     </>
