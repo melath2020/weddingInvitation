@@ -91,7 +91,6 @@ export default function WeddingInvitation() {
 
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
-        // fade in then out
         if (p.alpha < 0.8 && p.vy < 0) p.alpha += 0.03;
         else p.alpha -= p.decay;
 
@@ -156,7 +155,7 @@ export default function WeddingInvitation() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@300;400;500;600;700&family=Noto+Serif+Malayalam:wght@300;400;500;600;700&family=Cinzel:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Malayalam:wght@300;400;500;600;700&family=Noto+Serif+Malayalam:wght@300;400;500;600;700&family=Cinzel:wght@400;500&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap');
 
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -226,7 +225,6 @@ export default function WeddingInvitation() {
           pointer-events: none;
         }
 
-        /* silk curtain left & right panels that slide apart */
         .curtain-left, .curtain-right {
           position: absolute;
           top: 0; bottom: 0;
@@ -241,7 +239,6 @@ export default function WeddingInvitation() {
         .curtain-left.open  { transform: translateX(-100%); }
         .curtain-right.open { transform: translateX(100%); }
 
-        /* gold border on curtain inner edges */
         .curtain-left::after {
           content: '';
           position: absolute;
@@ -257,7 +254,6 @@ export default function WeddingInvitation() {
           background: linear-gradient(to bottom, transparent, var(--gold-border), #f0d080, var(--gold-border), transparent);
         }
 
-        /* silky texture stripes on curtain */
         .curtain-left .silk, .curtain-right .silk {
           position: absolute;
           inset: 0;
@@ -269,7 +265,6 @@ export default function WeddingInvitation() {
           );
         }
 
-        /* ornate mandala-like ring that spins on bg */
         .mandala-ring {
           position: absolute;
           width: min(380px, 90vw);
@@ -298,7 +293,6 @@ export default function WeddingInvitation() {
           to   { transform: rotate(360deg); }
         }
 
-        /* floating diyas / dots */
         .diya {
           position: absolute;
           width: 6px; height: 6px;
@@ -313,7 +307,6 @@ export default function WeddingInvitation() {
           to   { opacity: 1;   transform: scale(1.2); }
         }
 
-        /* ── CENTRE CARD shown behind curtains ── */
         .centre-card {
           position: relative;
           z-index: 10;
@@ -336,7 +329,6 @@ export default function WeddingInvitation() {
           to   { box-shadow: 0 0 0 1px #f0d080, 0 0 0 4px rgba(201,168,76,0.4), 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(201,168,76,0.2); }
         }
 
-        /* inner border */
         .card-inner-border {
           position: absolute;
           inset: 7px;
@@ -345,7 +337,6 @@ export default function WeddingInvitation() {
           pointer-events: none;
           z-index: 1;
         }
-        /* corner marks */
         .card-corner {
           position: absolute;
           width: 18px; height: 18px;
@@ -470,7 +461,6 @@ export default function WeddingInvitation() {
           opacity: 0.45;
         }
 
-        /* ── open button — sits below card ── */
         .open-btn {
           position: absolute;
           bottom: 2.5rem;
@@ -511,7 +501,6 @@ export default function WeddingInvitation() {
           0%, 100% { box-shadow: 0 0 0 1px rgba(201,168,76,0.6), 0 0 0 4px rgba(123,28,28,0.5), 0 0 0 5px rgba(201,168,76,0.25), 0 8px 24px rgba(0,0,0,0.5); }
           50%       { box-shadow: 0 0 0 1px rgba(201,168,76,0.8), 0 0 0 4px rgba(123,28,28,0.5), 0 0 0 8px rgba(201,168,76,0.1), 0 8px 24px rgba(0,0,0,0.5); }
         }
-
 
         /* ════════════════════════════
            MAIN INVITATION CONTENT
@@ -937,9 +926,119 @@ export default function WeddingInvitation() {
           .info-box { padding: 1rem; }
           .inner-content { padding: 2rem 1.2rem 2.2rem; }
         }
+
+        /* ── BRAND FOOTER ── */
+        .brand-footer {
+          margin-top: 2rem;
+          padding: 1.8rem 1.5rem 1.6rem;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.55rem;
+          background: linear-gradient(to bottom, rgba(42,26,0,0.0), rgba(42,26,0,0.03));
+          border-radius: 0 0 4px 4px;
+        }
+
+        .brand-divider {
+          display: flex;
+          align-items: center;
+          gap: 0.6rem;
+          width: 100%;
+          margin-bottom: 0.6rem;
+        }
+
+        .brand-line {
+          flex: 1;
+          height: 1px;
+          background: linear-gradient(to right, transparent, rgba(201,168,76,0.4), transparent);
+        }
+
+        .brand-icon {
+          font-size: 0.7rem;
+          color: var(--gold-border);
+          opacity: 0.7;
+        }
+
+        .brand-made {
+          font-size: 0.6rem;
+          letter-spacing: 0.2em;
+          color: var(--muted);
+          opacity: 0.6;
+          text-transform: uppercase;
+          line-height: 1;
+        }
+
+        .brand-heart {
+          font-size: 0.85rem;
+          color: #c0392b;
+          opacity: 0.7;
+          animation: heartbeat 1.8s ease-in-out infinite;
+          line-height: 1;
+        }
+
+        @keyframes heartbeat {
+          0%, 100% { transform: scale(1); }
+          14%       { transform: scale(1.25); }
+          28%       { transform: scale(1); }
+          42%       { transform: scale(1.15); }
+          56%       { transform: scale(1); }
+        }
+
+        .brand-name {
+          font-family: 'Cormorant Garamond', 'Cinzel', serif;
+          font-size: 1.6rem;
+          font-weight: 600;
+          color: var(--dark);
+          letter-spacing: 0.04em;
+          line-height: 1;
+        }
+
+        .brand-name span {
+          color: var(--gold);
+        }
+
+        .brand-tagline {
+          font-size: 0.58rem;
+          letter-spacing: 0.22em;
+          color: var(--muted);
+          opacity: 0.55;
+          text-transform: uppercase;
+          margin-bottom: 0.6rem;
+        }
+
+        .wa-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: linear-gradient(135deg, #1a7a3c, #25a850, #1a7a3c);
+          color: #fff;
+          font-family: 'Noto Sans Malayalam', sans-serif;
+          font-size: 0.75rem;
+          font-weight: 600;
+          letter-spacing: 0.04em;
+          padding: 0.65rem 1.4rem;
+          border-radius: 30px;
+          text-decoration: none;
+          box-shadow: 0 4px 16px rgba(37,168,80,0.35), 0 0 0 1px rgba(37,168,80,0.3);
+          transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+          margin-top: 0.3rem;
+        }
+
+        .wa-btn:hover {
+          transform: translateY(-2px);
+          background: linear-gradient(135deg, #1e8f45, #2dbc5c, #1e8f45);
+          box-shadow: 0 8px 24px rgba(37,168,80,0.45), 0 0 0 1px rgba(37,168,80,0.4);
+        }
+
+        .wa-icon {
+          width: 16px;
+          height: 16px;
+          flex-shrink: 0;
+        }
       `}</style>
 
-      {/* ── NEW OPENING SCREEN — CURTAIN + CENTRE CARD ── */}
+      {/* ── OPENING SCREEN — CURTAIN + CENTRE CARD ── */}
       <div className={`envelope-screen${opened ? " hide" : ""}`}>
 
         {/* spinning mandala ring */}
@@ -1197,19 +1296,26 @@ export default function WeddingInvitation() {
 
           </div>
           <div className="gold-border-bottom" />
+
+          {/* ── Brand Footer ── */}
+          <div className="brand-footer">
+            <div className="brand-divider">
+              <span className="brand-line" /><span className="brand-icon">✦</span><span className="brand-line" />
+            </div>
+            <p className="brand-made">Crafted with</p>
+            <div className="brand-heart">♥</div>
+            <div className="brand-name">Invite<span>ly</span></div>
+            <p className="brand-tagline">Premium Digital Invitations</p>
+            <a href="https://wa.me/919846932069?text=Hi%2C%20I%27d%20like%20to%20create%20a%20premium%20digital%20invitation%20for%20my%20event%20%F0%9F%8C%B8" target="_blank" rel="noopener noreferrer" className="wa-btn">
+              <svg viewBox="0 0 24 24" className="wa-icon" fill="currentColor">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+              </svg>
+              Create Your Invitation
+            </a>
+          </div>
+
         </div>
 
-        <div style={{
-          textAlign: "center",
-          marginTop: "1.2rem",
-          fontSize: "0.58rem",
-          color: "var(--muted)",
-          opacity: 0.5,
-          letterSpacing: "0.15em",
-          fontFamily: "'Raleway', sans-serif",
-        }}>
-          WITH LOVE BY <a href="https://aswinsudhakaran.in/" target="_blank" rel="noopener noreferrer" style={{ color: "var(--muted)", textDecoration: "none", borderBottom: "1px solid rgba(107,76,30,0.3)" }}>AS</a>
-        </div>
       </div>
     </>
   );
