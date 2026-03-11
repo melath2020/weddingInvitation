@@ -1061,7 +1061,7 @@ export default function WeddingInvitation() {
           letterSpacing: "0.15em",
           fontFamily: "'Raleway', sans-serif",
         }}>
-          DEVELOPED &amp; DESIGNED BY <a href="https://aswinsudhakaran.in/" target="_blank" rel="noopener noreferrer" style={{ color: "var(--muted)", textDecoration: "none", borderBottom: "1px solid rgba(107,76,30,0.3)" }}>ASWIN SUDHAKARAN</a>
+          MADE WITH ❤️ BY   <a href="https://aswinsudhakaran.in/" target="_blank" rel="noopener noreferrer" style={{ color: "var(--muted)", textDecoration: "none", borderBottom: "1px solid rgba(107,76,30,0.3)" }}>AS</a>
         </div>
       </div>
     </>
